@@ -28,7 +28,7 @@ int string2int (char* src)
     while (*src)
     {
         assert (*src > '0' && *src <'9');
-        if(number < INT32_MAX/10 || number == INT32_MAX/10 && (*src - '0') <= (INT32_MAX%10))
+        if(number < INT32_MAX/10 || (number == INT32_MAX/10 && (*src - '0') <= (INT32_MAX%10)))
         {
             number = number * 10 + (*src - '0');
         }else  {
@@ -99,7 +99,7 @@ public:
                     }
                     size++;
                     return;
-                }else if(!(tmp->next) || tmp->next && tmp->next->key > key) // insert node after tmp
+                }else if(!(tmp->next) ||( tmp->next && tmp->next->key > key)) // insert node after tmp
                 {
                     mapNode* newNode = new mapNode();
                     newNode -> key = key;
@@ -157,7 +157,7 @@ public:
 
     int getSize()
     {
-        return this.size;
+        return this->size;
     }
     bool isEmpty()
     {
@@ -168,6 +168,49 @@ private:
     mapNode* head;
     int size;
     
+};
+
+enum RBTree_Color {
+    RBTree_Color_RED,
+    RBTree_Color_BLACK
+};
+
+template<typename T>
+class TBTreeMap{
+    class RBTreeNode
+    {
+    public:
+        uint32_t key;
+        T value;
+        RBTree_Color color;
+
+        RBTreeNode* parent, rsibl, lsibl;
+
+        RBTreeNode(uint32_t k, const T& v, RBTree_Color color = RBTree_Color_BLACK)
+        {
+            this->key = k;
+            this->value = v;
+            this->color = color;
+        };
+        ~RBTreeNode() {};
+    };
+    
+    
+
+public:
+    bool insert(uint32_t key, const T& v)
+    {
+        if(!root)
+        {
+            root = new RBTreeNode(key, v);
+        }
+
+        return false;
+    }
+private:
+
+    RBTreeNode* root;
+
 };
 
 int main(int argc, char* argv[])
