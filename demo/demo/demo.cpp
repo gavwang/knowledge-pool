@@ -1,21 +1,453 @@
 // demo.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
-
+#include "advancedcxx.h"
 #include <iostream>
 #include "demo.h"
+#include "algorithm.h"
+#include <cassert>
+#include <cstring>
+#include <array>
+
+/*
+basic function
+memcpy()
+memset()
+*/
+
+
+void basicFunction()
+{
+	//void *dst, *src;
+	//memcpy(dst, src, 0);
+	//memset(dst, 0, 0);
+}
+
+template <typename Key, typename T>
+class MyMap
+{
+public:
+	MyMap() {};
+	virtual ~MyMap() {};
+	
+	virtual void set(Key key, T value) = 0;
+	virtual const pair<int, T>* get(Key key) = 0;
+	virtual void remove(Key key) = 0;
+
+private:
+
+};
+
+#define BUCKETS_DEFAULT 31
+template <typename T>
+class MyHashMap:public MyMap<int, T>
+{
+public:
+	MyHashMap():
+		bucketSize(BUCKETS_DEFAULT),
+		entrySize(0)
+	{
+		buckets = new Entry*[bucketSize];
+		memset(buckets, 0, sizeof(Entry*)*bucketSize);
+	};
+	~MyHashMap() {
+		for (int i = 0; i < bucketSize; i++)
+		{
+			Entry* header = buckets[i];
+			while (header)
+			{
+				Entry* next = header->next;
+				delete header;
+				bucketSize--;
+				header = next;
+			}
+			buckets[i] = nullptr;
+		}
+
+		delete[] buckets;
+
+	};
+	
+	typedef pair<int, T>* iterator;
+
+
+
+	class Entry
+	{
+	public:
+		Entry() :next(nullptr) {};
+		~Entry() {};
+		pair<int, T> value;
+		Entry* next;
+
+	};
+	typedef Entry* PEntry;
+
+	void set(int key, T value) {
+		set(make_pair(key, value));
+	};
+
+	void set(pair<int, T> e)
+	{
+		if (buckets[hashCode(e.first)])
+		{
+			Entry* entry = buckets[hashCode(e.first)];
+			while ( entry)
+			{
+				if (entry->value.first == e.first)
+				{
+					entry->value.second = e.second;
+					return ;
+				}	
+				entry = entry->next;
+			}
+		}
+
+		Entry* newEentry = new Entry();
+		newEentry->value = e;
+		newEentry->next = buckets[hashCode(e.first)];
+		buckets[hashCode(e.first)] = newEentry;
+		entrySize++;
+
+	}
+	
+	const pair<int,T>* get(int key) {
+
+		if (buckets[hashCode(key)])
+		{
+			Entry* entry = buckets[hashCode(key)];
+			while (entry)
+			{
+				if (entry->value.first == key)
+				{
+					return &(entry->value);
+				}
+				entry = entry->next;
+			}
+		}
+
+		return nullptr;
+	};
+	
+	void remove(int key) {
+		if (buckets[hashCode(key)])
+		{
+			Entry* entry = buckets[hashCode(key)];
+			if (entry->value.first == key)
+			{
+				buckets[hashCode(key)] = entry->next;
+				delete entry;
+				bucketSize--;
+			}
+			else
+			{
+				while (entry->next)
+				{
+					if (entry->next->value.first == key)
+					{
+						Entry* beDeleted = entry->next;
+						entry->next = entry->next->next;
+
+						delete beDeleted;
+						bucketSize--;
+					}
+
+				}
+			}
+		}
+	};
+private:
+
+	void removeBucket(int index)
+	{
+		Entry* header = buckets[index];
+		while (header)
+		{
+			Entry* next = header->next;
+			delete header;
+			bucketSize--;
+			header = next;
+		}
+	}
+
+	int hashCode(int key)
+	{
+		return key % (bucketSize);
+	}
+	int hashCode(Entry* e) {
+		return hashCode(e->value.first);
+	};
+	void capbility() {
+
+	}
+private:
+	int bucketSize;
+	int entrySize;
+	Entry** buckets;
+
+};
+
+
+
+//MyMap::MyMap()
+//{
+//}
+//
+//MyMap::~MyMap()
+//{
+//}
+
+void swapInt(int& a, int& b)
+{
+	//a = a + b;
+	//b = a - b;
+	//a = a - b;
+	a = a ^ b;
+	b = a ^ b;
+	a = a ^ b;
+}
+void bubbleSort(int a[], int size)
+{
+	for (size_t i = 0; i < size-1; i++)
+	{
+		for(int j = 0 ; j < size - i - 1; j++)
+		if (a[j] > a[j + 1])
+		{
+			swapInt(a[j], a[j + 1]);
+		}
+
+	}
+
+}
+
+
+void mergeArray(int a[], int sizeA, int b[], int sizeB)
+{
+	int len = sizeA + sizeB;
+
+	int curPos = len - 1;
+
+	int aPos = sizeA - 1;
+	int bPos = sizeB - 1;
+
+	while (aPos >= 0 && bPos >= 0)
+	{
+		a[curPos--] = a[aPos] > b[bPos] ? a[aPos--] : b[bPos--];
+	}
+
+	while (aPos >= 0)
+	{
+		a[curPos--] = a[aPos--];
+	}
+
+	while (bPos >= 0)
+	{
+		a[curPos--] = b[bPos--];
+	}
+}
+
+
+void merge(int arr[], int first,int mid, int last)
+{
+	//int mid = first + (last - first) / 2;
+	int* tmpArr = new int[last - first + 1];
+	
+	int curIndex = 0;
+	int lpos = first;
+	int rpos = mid + 1;
+	while (lpos <= mid  && rpos <= last)
+	{
+		if (arr[lpos] <= arr[rpos])
+		{
+			tmpArr[curIndex++] = arr[lpos++];
+		}
+		else
+		{
+			tmpArr[curIndex++] = arr[rpos++];
+		}
+	}
+	while (lpos <= mid)
+	{
+		tmpArr[curIndex++] = arr[lpos++];
+	}
+
+	while (rpos <= last)
+	{
+		tmpArr[curIndex++] = arr[rpos++];
+	}
+
+	for (size_t i = 0; i < last-first + 1; i++)
+	{
+		arr[first + i] = tmpArr[i];
+	}
+}
+
+/*
+left: pos
+ritht pos of array
+*/
+void sort_recursive(int a[], int first, int last)
+{
+	if (first >= last)
+		return;
+	int mid = first + (last - first) / 2;
+	sort_recursive(a, first, mid);
+	sort_recursive(a, mid + 1, last);
+	merge(a, first,mid, last);
+}
+
+
+void mergeSort(int a[], int size) {
+
+	sort_recursive(a, 0, size - 1);
+}
+
+
+void loopMergeSort(int a[], int len) {
+	int* arr = a;
+	int* tmp = new int[len];
+
+	int step = 1;
+	int start = 0;
+	for ( step = 1; step < len; step += step)
+	{
+		for (start = 0; start < len; start += step*2)
+		{
+			int low = start;
+			int mid = min(start + step, len);
+			int high = min(start + 2 * step, len);
+			int curPos = start;
+			int start1 = low;
+			int end1 = mid;
+			int start2 = mid;
+			int end2 = high;
+
+			while (start1 < mid && start2 < end2 )
+			{
+				tmp[curPos++] = arr[start1] < arr[start2] ? arr[start1++] : arr[start2++];
+			}
+
+			while (start1 < end1)
+			{
+				tmp[curPos++] = arr[start1++];
+			}
+			while (start2 < end2)
+			{
+				tmp[curPos++] = arr[start2++];
+			}
+
+		}
+
+		int* tmpPtr = arr;
+		arr = tmp;
+		tmp = tmpPtr;
+	}
+
+	if (arr != a)
+	{
+		for (int i = 0; i < len; i++)
+		{
+			tmp[i] = arr[i];
+		}
+
+		tmp = arr;
+	}
+
+	delete[] tmp;
+}
+
+
+bool lbs_less(int x, int y)
+{
+	return x > y;
+}
+bool less_10(int x)
+{
+	return x<10;
+}
+struct  test
+{
+	bool operator ()(int& left, int& right) {
+		return left > right;
+	}
+
+};
 
 int main()
-{
-    std::cout << "Hello World!\n";
+{ 
+	std::cout << "Hello World!\n" << endl;
+
+	advancedcxxTest();
+
+	int a[] = { 1,7,5,9,0,0,0,0 };
+	int b[] = { 2,6,3,8 };
+	mergeArray(a, 4, b, 4);
+
+	//int bubbles [] = { 6,5,3,1,8,7,2,4,78,34,56,21,17,46,84,36 };
+
+	//bubbleSort(bubbles, sizeof(bubbles)/sizeof(bubbles[0]));
+
+	//int sample[] = { 6,5,3,1,8,7,2,4,78,34,56,56,21,17,46,84,36 };
+
+	int sample[] = { 83, 86, 77, 15, 93, 35, 86, 92, 49, 21, 62, 27, 90, 59, 63, 26, 40, 26, 72, 36 };
+	//loopMergeSort(sample, sizeof(sample) / sizeof(sample[0]));
+	mergeSort(sample, sizeof(sample) / sizeof(sample[0]));
+
+
+
+	std::array<int, 10> arr = { 1,3,5,2,68,45,24,45,34,67 };
+
+
+	std::sort(arr.begin(), arr.end(), test());
+	//std::sort(arr.begin(), arr.end(), );
+
+
+	cout << "sizeof(int): " << sizeof(int) << endl;
+	cout << "int32_max: " << INT32_MAX << endl;
+	cout << "int32_min: " << INT32_MIN << endl;
+	cout << "uint32_max: " << UINT32_MAX << endl;
+	cout << "int64_max: " << INT64_MAX << endl;
+	cout << "int64_min: " << INT64_MIN << endl;
+	cout << "uint64_max: " << UINT64_MAX << endl;
+	cout << "long " << LONG_MAX << endl;
+
+	string number("13454589");
+	cout << "string2int: " << number << "-->" << string2int(number) << endl;
+
 
 	Fruit* f = new Apple();
-
 	f->name();
 	f->Fruit::name();
-
 	delete f;
 
-	getchar();
+
+	MyHashMap<string> map;// = new MyHashMap<string>();
+
+	map.set(1, "1");
+	map.set(5, "5");
+	map.set(65534, "65534");
+	map.set(1000, "1000");
+	map.set(32, "32");
+
+	map.set(800, "800");
+
+	const pair<int, string>* p = map.get(1);
+	p = map.get(4);
+	p = map.get(65534);
+	p = map.get(1000);
+	p = map.get(800);
+
+
+	map.remove(4);
+	map.remove(1);
+	map.remove(65534);
+
+	p = map.get(4);
+	p = map.get(65534);
+	p = map.get(1000);
+	p = map.get(800);
+
+
+	return 0;
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

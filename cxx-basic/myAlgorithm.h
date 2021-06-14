@@ -82,3 +82,18 @@ int string2int2 (char* src)
     return  number;
     
 }
+
+
+
+int string2int3(char* data) {
+    assert(data != nullptr);
+
+    long number = 0;
+    while (*data != '\0')
+    {
+        assert(*data >= '0' && *data <='9');
+        number = number * 10 + ((*data)-'0');
+        assert(number <= INT32_MAX);
+    }
+    
+}
