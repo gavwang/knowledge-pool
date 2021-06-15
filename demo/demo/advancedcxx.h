@@ -148,7 +148,7 @@ void advancedcxxTest()
 	shared_ptr<int> arr(new int[5]);
 	//auto a2 = make_shared<int[1024]>();    //error
 	//auto ashared = make_shared<int[5]>();   //error
-	auto p = make_unique<int[]>(5);
+	auto parr = make_unique<int[]>(5);
 
 
 

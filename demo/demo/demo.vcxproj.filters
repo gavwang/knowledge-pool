@@ -23,13 +23,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="demo.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="algorithm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="advancedcxx.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ccbuffer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

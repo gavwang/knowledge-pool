@@ -1,12 +1,20 @@
 // demo.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
+
+#define NOMINMAX
+
 #include "advancedcxx.h"
 #include <iostream>
-#include "demo.h"
+#include "ccbuffer.h"
 #include "algorithm.h"
 #include <cassert>
 #include <cstring>
 #include <array>
+#include <limits>
+#include <vector>
+
+
+
 
 /*
 basic function
@@ -15,12 +23,22 @@ memset()
 */
 
 
-void basicFunction()
+
+class NoCopybale {
+public:
+	inline NoCopybale() {};
+private:
+	NoCopybale(const NoCopybale& c) ;
+	const NoCopybale& operator = (const NoCopybale&);
+};
+
+class TestCopy : NoCopybale
 {
-	//void *dst, *src;
-	//memcpy(dst, src, 0);
-	//memset(dst, 0, 0);
-}
+public:
+	//TestCopy() {};
+	//~TestCopy() {};
+
+};
 
 template <typename Key, typename T>
 class MyMap
@@ -68,8 +86,6 @@ public:
 	};
 	
 	typedef pair<int, T>* iterator;
-
-
 
 	class Entry
 	{
@@ -186,15 +202,6 @@ private:
 
 };
 
-
-
-//MyMap::MyMap()
-//{
-//}
-//
-//MyMap::~MyMap()
-//{
-//}
 
 void swapInt(int& a, int& b)
 {
@@ -372,11 +379,49 @@ struct  test
 
 };
 
+
+unsigned int uintMax()
+{
+	return numeric_limits<unsigned int>::max();
+}
+
+unsigned int string2int5(const string& src)
+{
+	string newSrc(src);
+	newSrc.erase(0, src.find_first_not_of(' '));
+
+	const char* pSrc = newSrc.c_str();
+	unsigned int sum = 0;
+	char tConvert;
+	while (*pSrc)
+	{
+		assert(*pSrc >= '0' && *pSrc <= '9');
+		int curNumber = *pSrc - '0';
+		if (sum > uintMax() / 10 || 
+			(sum == uintMax() / 10 && curNumber > uintMax() % 10))
+		{
+			return uintMax();
+		}
+
+		sum = sum * 10 + curNumber;
+
+		pSrc++;
+	}
+	return sum;
+}
+
 int main()
 { 
+	NoCopybale n;
+	TestCopy t;
 	std::cout << "Hello World!\n" << endl;
+	std::cout << string2int5("3456778843")<<endl;
+	std::cout << string2int5("4294967296") << endl;
+	std::cout << string2int5("5294967296") << endl;
 
-	advancedcxxTest();
+	vector<int> v = { 1,2,3,5 };
+	
+	//advancedcxxTest();
 
 	int a[] = { 1,7,5,9,0,0,0,0 };
 	int b[] = { 2,6,3,8 };
@@ -392,23 +437,10 @@ int main()
 	//loopMergeSort(sample, sizeof(sample) / sizeof(sample[0]));
 	mergeSort(sample, sizeof(sample) / sizeof(sample[0]));
 
-
-
 	std::array<int, 10> arr = { 1,3,5,2,68,45,24,45,34,67 };
-
 
 	std::sort(arr.begin(), arr.end(), test());
 	//std::sort(arr.begin(), arr.end(), );
-
-
-	cout << "sizeof(int): " << sizeof(int) << endl;
-	cout << "int32_max: " << INT32_MAX << endl;
-	cout << "int32_min: " << INT32_MIN << endl;
-	cout << "uint32_max: " << UINT32_MAX << endl;
-	cout << "int64_max: " << INT64_MAX << endl;
-	cout << "int64_min: " << INT64_MIN << endl;
-	cout << "uint64_max: " << UINT64_MAX << endl;
-	cout << "long " << LONG_MAX << endl;
 
 	string number("13454589");
 	cout << "string2int: " << number << "-->" << string2int(number) << endl;
